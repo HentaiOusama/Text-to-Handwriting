@@ -11,16 +11,21 @@ public class Main {
 
     private static final int UNDERLINE = -2;
 
+    private static final HashMap<Integer, CharacterImage> allASCIIImages = new HashMap<>();
+    private static final StringBuffer inputText = new StringBuffer();
+    private static final String parameterFileName = "./baseParameters.txt";
     private static final int scaleFactor = 10;
     private static int outputFileCount = 0;
-    private static final String parameterFileName = "./baseParameters.txt";
+
+    // Readable Data
     private static int heightInMM = 208, widthInMM = 147, leftAndRightMarginInMM = 7, topMarginInMM = 12, bottomMarginInMM = 10;
     private static float characterHeightInMM = 2, lineSpacingInMM = 0.2f, baseSpaceWidthInMM = 0.2f;
+    private static float slantModeEnterProbability = 0f, slantModeExitProbability = 0f;
     private static boolean shouldAddSignature = false;
+
+    // Derived Data
     private static int leftStartPos = leftAndRightMarginInMM * scaleFactor, rightEndPos = (widthInMM - leftAndRightMarginInMM - 1) * scaleFactor;
     private static int bottomEndPos = (heightInMM - bottomMarginInMM - 1) * scaleFactor;
-    private static final HashMap<Integer, BufferedImage> allASCIIImages = new HashMap<>();
-    private static final StringBuffer inputText = new StringBuffer();
 
     private static void buildParametersAndInputText() throws IOException {
         File file = new File(parameterFileName);
@@ -28,15 +33,17 @@ public class Main {
         if (file.exists()) {
             try {
                 scanner = new Scanner(new FileInputStream(file));
-                heightInMM = Integer.parseInt(scanner.nextLine().split("#")[0].trim());
-                widthInMM = Integer.parseInt(scanner.nextLine().split("#")[0].trim());
-                leftAndRightMarginInMM = Integer.parseInt(scanner.nextLine().split("#")[0].trim());
-                characterHeightInMM = Float.parseFloat(scanner.nextLine().split("#")[0].trim());
-                topMarginInMM = Integer.parseInt(scanner.nextLine().split("#")[0].trim());
-                bottomMarginInMM = Integer.parseInt(scanner.nextLine().split("#")[0].trim());
-                lineSpacingInMM = Float.parseFloat(scanner.nextLine().split("#")[0].trim());
-                baseSpaceWidthInMM = Float.parseFloat(scanner.nextLine().split("#")[0].trim());
-                shouldAddSignature = Boolean.parseBoolean(scanner.nextLine().split("#")[0].trim());
+                heightInMM = Integer.parseInt(scanner.nextLine().split("#->")[0].trim());
+                widthInMM = Integer.parseInt(scanner.nextLine().split("#->")[0].trim());
+                leftAndRightMarginInMM = Integer.parseInt(scanner.nextLine().split("#->")[0].trim());
+                characterHeightInMM = Float.parseFloat(scanner.nextLine().split("#->")[0].trim());
+                topMarginInMM = Integer.parseInt(scanner.nextLine().split("#->")[0].trim());
+                bottomMarginInMM = Integer.parseInt(scanner.nextLine().split("#->")[0].trim());
+                lineSpacingInMM = Float.parseFloat(scanner.nextLine().split("#->")[0].trim());
+                baseSpaceWidthInMM = Float.parseFloat(scanner.nextLine().split("#->")[0].trim());
+                shouldAddSignature = Boolean.parseBoolean(scanner.nextLine().split("#->")[0].trim());
+                slantModeEnterProbability = Float.parseFloat(scanner.nextLine().split("#->")[0].trim());
+                slantModeExitProbability = Float.parseFloat(scanner.nextLine().split("#->")[0].trim());
 
                 leftStartPos = leftAndRightMarginInMM * scaleFactor;
                 rightEndPos = (widthInMM - leftAndRightMarginInMM - 1) * scaleFactor;
@@ -103,6 +110,46 @@ public class Main {
         System.out.println("Page " + outputFileCount + " Export : " + ((success) ? "Success" : "Failure"));
     }
 
+    private static boolean printCharacter(Graphics graphics, Cursor cursor, int data) throws IOException {
+        CharacterImage characterImage = getCharacterImage(data);
+        if (characterImage == null) {
+            return true;
+        }
+
+        graphics.drawImage(characterImage.image, cursor.getX(), cursor.getY(), characterImage.width, characterImage.height, null);
+
+        return cursor.move(characterImage.width);
+    }
+
+    private static CharacterImage getCharacterImage(int data) throws IOException {
+        CharacterImage characterImage;
+        if (!allASCIIImages.containsKey(data)) {
+            File file = new File("./characterSet/0/" + data + ".png");
+            if (!file.exists()) {
+                System.out.println(file + " Not Found. Skipping the character...");
+                return null;
+            }
+            BufferedImage bufferedImage = ImageIO.read(file);
+            characterImage = new CharacterImage(bufferedImage, (int) (bufferedImage.getWidth() *
+                    characterHeightInMM * scaleFactor / bufferedImage.getHeight()), (int) (characterHeightInMM * scaleFactor));
+            allASCIIImages.put(data, characterImage);
+        } else {
+            characterImage = allASCIIImages.get(data);
+        }
+
+        return characterImage;
+    }
+
+    private static int getExpectedWordLength(String string) throws IOException {
+        int length = 0;
+        CharacterImage characterImage;
+        for (int i = 0; i < string.length(); i++) {
+            characterImage = getCharacterImage(string.charAt(i));
+            length += (characterImage != null) ? characterImage.width : 0;
+        }
+        return length;
+    }
+
     public static void main(String[] args) throws IOException {
         buildParametersAndInputText();
 
@@ -119,7 +166,7 @@ public class Main {
         }
 
         Cursor cursor = new Cursor(leftStartPos, topMarginInMM * scaleFactor, leftStartPos, characterHeightInMM , lineSpacingInMM, scaleFactor,
-                bottomEndPos, rightEndPos);
+                bottomEndPos, rightEndPos, slantModeEnterProbability, slantModeExitProbability);
 
         while (inputText.length() > 0) {
 
@@ -135,6 +182,7 @@ public class Main {
             }
 
             inputText.deleteCharAt(0);
+
             switch (data) {
                 case 13 -> {
                     // Carriage Return
@@ -147,23 +195,14 @@ public class Main {
                     }
                 }
 
-                case ' ' -> cursor.move((int) ((baseSpaceWidthInMM * scaleFactor) + ((Math.random() * 7) - 3)));
+                case ' ' -> cursor.move((int) ((baseSpaceWidthInMM * scaleFactor) + ((Math.random() * 8) - 3)));
 
                 case UNDERLINE -> {
                     // Not yet complete
                 }
 
                 default -> {
-                    File file = new File("./characterSet/0/" + data + ".png");
-                    if (!file.exists()) {
-                        System.out.println(file + " Not Found. Skipping the character...");
-                        continue;
-                    }
-                    BufferedImage tempImg = ImageIO.read(file);
-                    int width = (int) (tempImg.getWidth() * characterHeightInMM * scaleFactor / tempImg.getHeight());
-                    int height = (int) (characterHeightInMM * scaleFactor);
-                    graphics.drawImage(tempImg, cursor.getX(), cursor.getY(), width, height, null);
-                    if(!cursor.move(width)) {
+                    if(!printCharacter(graphics, cursor, data)) {
                         return;
                     }
                 }
