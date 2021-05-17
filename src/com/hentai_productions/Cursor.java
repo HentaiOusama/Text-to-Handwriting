@@ -33,7 +33,7 @@ public class Cursor {
         }
 
         x = leftStartPos;
-        y += ((characterHeightInMM + lineSpacingInMM) * scaleFactor) + (Math.random() * 4) - 1;
+        y += ((characterHeightInMM + lineSpacingInMM) * scaleFactor) + (int) ((Math.random() * 5) - 2);
 
         return y < bottomEndPos;
     }
