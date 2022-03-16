@@ -72,7 +72,7 @@ public class Main {
         }
 
         file = new File("inputDocument.txt");
-        if(file.exists()) {
+        if (file.exists()) {
             BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
             int data;
             while ((data = bufferedReader.read()) != -1) {
@@ -110,7 +110,7 @@ public class Main {
 
             if (specialSymbol.isSpecialSymbol) {
                 int data = specialSymbol.getSymbolCode();
-                for(int i = 0; i < specialSymbol.getSymbolLength(); i++) {
+                for (int i = 0; i < specialSymbol.getSymbolLength(); i++) {
                     inputText.deleteCharAt(0);
                 }
                 switch (data) {
@@ -159,26 +159,22 @@ public class Main {
                 8 * scaleFactor, null);
     }
 
-    private static SpecialSymbol isOrGetSpecialSymbol (int pos) {
+    private static SpecialSymbol isOrGetSpecialSymbol(int pos) {
         SpecialSymbol specialSymbol = null;
 
         int data = inputText.charAt(pos);
 
         if (data == '\n') {
             specialSymbol = new SpecialSymbol(true, '\n', 1);
-        }
-        else if (data == 13) {
+        } else if (data == 13) {
             specialSymbol = new SpecialSymbol(true, 13, 1);
-        }
-        else if (data == ' ') {
+        } else if (data == ' ') {
             specialSymbol = new SpecialSymbol(true, ' ', 1);
-        }
-        else if (data == '^' && inputText.length() >= (pos + 2)) {
+        } else if (data == '^' && inputText.length() >= (pos + 2)) {
             if (inputText.charAt(1) == '_' && inputText.charAt(2) == data) {
                 specialSymbol = new SpecialSymbol(true, UNDERLINE, 3);
             }
-        }
-        else {
+        } else {
             specialSymbol = new SpecialSymbol(false);
         }
 
@@ -188,7 +184,7 @@ public class Main {
     private static Word getWord() {
 
         StringBuilder result = new StringBuilder();
-        for(int i = 0; i < inputText.length(); i++) {
+        for (int i = 0; i < inputText.length(); i++) {
             if (!isOrGetSpecialSymbol(i).isSpecialSymbol) {
                 result.append(inputText.charAt(i));
             } else {
@@ -251,7 +247,7 @@ public class Main {
     private static void exportImage(BufferedImage bufferedImage) throws IOException {
         boolean success = false;
         File outputFile = new File("./outputFiles/" + ++outputFileCount + ".png");
-        if(!outputFile.getParentFile().exists()) {
+        if (!outputFile.getParentFile().exists()) {
             if (!outputFile.getParentFile().mkdirs()) {
                 System.out.println("Image " + outputFileCount + " creation : Failure");
                 return;
