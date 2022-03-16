@@ -48,7 +48,7 @@ public class Cursor {
         }
 
         x += distance;
-        if(x >= rightEndPos) {
+        if (x >= rightEndPos) {
             return enter();
         } else {
             return true;

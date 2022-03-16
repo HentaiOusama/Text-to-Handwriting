@@ -239,9 +239,10 @@ public class Main {
 
         int yDifference = (int) ((baseCharacterHeightInMM * scaleFactor) - characterImage.height);
 
-        graphics.drawImage(characterImage.image, cursor.getX(), cursor.getY() + yDifference, characterImage.width, characterImage.height, null);
+        graphics.drawImage(characterImage.image, cursor.getX(), cursor.getY() + yDifference + ((int) ((Math.random() * 6) - 2.5f)),
+                characterImage.width, characterImage.height, null);
 
-        return cursor.move(characterImage.width);
+        return cursor.move(characterImage.width + ((int) (Math.random() * 4)));
     }
 
     private static void exportImage(BufferedImage bufferedImage) throws IOException {
