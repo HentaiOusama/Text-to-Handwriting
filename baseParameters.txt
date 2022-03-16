@@ -7,6 +7,8 @@ true   #-> Should Offset Character Height (Boolean)
 10     #-> Bottom Margin In MM (Int)
 0.2    #-> Base Line-Spacing In MM (Float) ( The scaled value could get offset by a value in range [-1, 2] inclusive )
 1.55   #-> Base Space Width In MM (Float)
+4      #-> Character spacing range
+5      #-> Base Vertical Position Offset ( Gets offset by -2.5 )
 true   #-> Should Add Signature (Boolean)
 0.4    #-> Slant Mode Enter Probability (Float)
 0.15   #-> Slant Mode Exit Probability (Float)

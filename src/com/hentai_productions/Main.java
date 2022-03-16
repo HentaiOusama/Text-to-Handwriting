@@ -26,6 +26,9 @@ public class Main {
     private static float baseLineSpacingInMM = 0.2f, baseSpaceWidthInMM = 1.55f;
     private static boolean shouldAddSignature = false;
     private static float slantModeEnterProbability = 0f, slantModeExitProbability = 0f;
+    private static float verticalPositionOffset = 4.0f;
+    private static float baseCharacterSpacing = 5;
+    private static final float characterSpacingOffset = 2.5f;
 
     // Derived Data
     private static int leftStartPos = leftAndRightMarginInMM * scaleFactor, rightEndPos = (widthInMM - leftAndRightMarginInMM - 1) * scaleFactor;
@@ -55,6 +58,8 @@ public class Main {
                 bottomMarginInMM = Integer.parseInt(scanner.nextLine().split("#->")[0].trim());
                 baseLineSpacingInMM = Float.parseFloat(scanner.nextLine().split("#->")[0].trim());
                 baseSpaceWidthInMM = Float.parseFloat(scanner.nextLine().split("#->")[0].trim());
+                verticalPositionOffset = Float.parseFloat(scanner.nextLine().split("#->")[0].trim());
+                baseCharacterSpacing = Float.parseFloat(scanner.nextLine().split("#->")[0].trim());
                 shouldAddSignature = Boolean.parseBoolean(scanner.nextLine().split("#->")[0].trim());
                 slantModeEnterProbability = Float.parseFloat(scanner.nextLine().split("#->")[0].trim());
                 slantModeExitProbability = Float.parseFloat(scanner.nextLine().split("#->")[0].trim());
@@ -239,10 +244,11 @@ public class Main {
 
         int yDifference = (int) ((baseCharacterHeightInMM * scaleFactor) - characterImage.height);
 
-        graphics.drawImage(characterImage.image, cursor.getX(), cursor.getY() + yDifference + ((int) ((Math.random() * 6) - 2.5f)),
+        graphics.drawImage(characterImage.image, cursor.getX(), cursor.getY() + yDifference +
+                        ((int) ((Math.random() * baseCharacterSpacing) - characterSpacingOffset)),
                 characterImage.width, characterImage.height, null);
 
-        return cursor.move(characterImage.width + ((int) (Math.random() * 4)));
+        return cursor.move(characterImage.width + ((int) (Math.random() * verticalPositionOffset)));
     }
 
     private static void exportImage(BufferedImage bufferedImage) throws IOException {
